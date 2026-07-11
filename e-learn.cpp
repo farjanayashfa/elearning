@@ -4,7 +4,7 @@
 #include <cctype>
 #include <limits>
 #include<conio.h>
-//#include <windows.h>
+#include <windows.h>
 #include <sstream>
 #include <ctime>
 #include <cstdlib>
@@ -390,10 +390,8 @@ void ELearningSystem::studentDashboard()
         cout<<"=====================================\n";
 
         cout<<"1. View Profile\n";
-        cout<<"2.Change Password\n";
-        cout<<"3.Forgot Password\n";
-        cout<<"4. Logout\n";
-
+        cout<<"2. Change Password\n";
+        cout<<"3. Logout\n";
 
         cout<<"\nChoice : ";
         cin>>choice;
@@ -410,11 +408,6 @@ void ELearningSystem::studentDashboard()
             break;
 
         case 3:
-            forgotPassword();
-            break;
-
-        case 4:
-
             char ans;
 
             cout<<"\nAre you sure you want to logout? (Y/N): ";
@@ -490,16 +483,72 @@ void ELearningSystem::changePassword()
                 continue;
             }
 
+            generatedOTP = 100000 + rand() % 900000;
+
+            ofstream otpFile("OTP_Message.txt");
+
+            otpFile << "=====================================\n";
+            otpFile << "      E-LEARNING PLATFORM\n";
+            otpFile << "=====================================\n\n";
+            otpFile << "Change Password OTP\n\n";
+            otpFile << "Email : " << email1 << "\n";
+            otpFile << "OTP : " << generatedOTP << "\n";
+
+            otpFile.close();
+
+            cout << "\nSending OTP";
+
+            for(int i=0; i<3; i++)
+            {
+                cout<<".";
+                Sleep(500);
+            }
+
+            cout<<"\n\nOTP Sent Successfully!\n";
+            cout<<"Please check OTP_Message.txt\n";
+
+            int otp;
+
+            cout<<"\nEnter OTP : ";
+            cin>>otp;
+            cin.ignore();
+
+            if(otp!=generatedOTP)
+            {
+                cout<<"\nWrong OTP!\n";
+
+                temp<<role1<<","<<email1<<","<<password1<<","<<name1<<","
+                    <<phone1<<","<<dept1<<","<<question1<<","<<answer1<<"\n";
+
+                continue;
+            }
+
+            string newPass;
+            string confirmPass;
+
             do
             {
-                cout<<"New Password: ";
+                cout<<"\nNew Password : ";
                 newPass=inputPassword();
 
                 if(!isStrongPassword(newPass))
-                    cout<<"Weak Password!\n";
+                    cout<<"\nWeak Password!\n";
 
             }
             while(!isStrongPassword(newPass));
+
+            cout<<"Confirm Password : ";
+            confirmPass=inputPassword();
+
+            if(newPass!=confirmPass)
+            {
+                cout<<"\nPassword Doesn't Match!\n";
+
+                temp<<role1<<","<<email1<<","<<password1<<","<<name1<<","
+                    <<phone1<<","<<dept1<<","<<question1<<","<<answer1<<"\n";
+
+                continue;
+            }
 
             password1=newPass;
 
@@ -524,7 +573,7 @@ void ELearningSystem::changePassword()
     system("pause");
 }
 
-    void ELearningSystem::forgotPassword()
+void ELearningSystem::forgotPassword()
 {
     string email;
 
@@ -578,7 +627,14 @@ void ELearningSystem::changePassword()
 
             otpFile.close();
 
-            cout << "\nOTP sent successfully!\n";
+            cout << "\nSending OTP";
+            for(int i=0; i<3; i++)
+            {
+                cout<<".";
+                Sleep(500);
+            }
+
+            cout << "\n\nOTP Sent Successfully!\n";
             cout << "Please check OTP_Message.txt\n";
 
             int otp;
@@ -598,7 +654,8 @@ void ELearningSystem::changePassword()
                     if (!isStrongPassword(newPass))
                         cout << "Weak Password! Try Again.\n";
 
-                } while (!isStrongPassword(newPass));
+                }
+                while (!isStrongPassword(newPass));
 
                 password1 = newPass;
 
@@ -642,33 +699,39 @@ void ELearningSystem::teacherDashboard()
         cout<<"       TEACHER DASHBOARD\n";
         cout<<"=====================================\n";
 
-       cout<<"1. View Profile\n";
-cout<<"2. Change Password\n";
-cout<<"3. Forgot Password\n";
-cout<<"4. Logout\n";
-
+        cout<<"1. View Profile\n";
+        cout<<"2. Change Password\n";
+        cout<<"3. Logout\n";
         cout<<"\nChoice : ";
         cin>>choice;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch(choice)
         {
-       case 1:
-    viewProfile();
-    break;
+        case 1:
+            viewProfile();
+            break;
 
-case 2:
-    changePassword();
-    break;
+        case 2:
+            changePassword();
+            break;
 
-case 3:
-    forgotPassword();
-    break;
+        case 3:
+        {
+            char ans;
 
-case 4:
-    cout<<"\nLogging out...\n";
-    return;
+            cout<<"\nAre you sure you want to logout? (Y/N): ";
+            cin>>ans;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
+            if(ans=='Y' || ans=='y')
+            {
+                cout<<"\nLogging out...\n";
+                return;
+            }
+
+            break;
+        }
         default:
 
             cout<<"\nInvalid Choice!\n";
@@ -691,10 +754,11 @@ int main()
 
         cout << "1. Register\n";
         cout << "2. Login\n";
-        cout << "3. Exit\n";
-        cout << "Choice: ";
-
+        cout << "3. Forgot Password\n";
+        cout << "4. Exit\n";
+        cout<<"choice : ";
         cin >> choice;
+
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch (choice)
@@ -708,6 +772,10 @@ int main()
             break;
 
         case 3:
+            obj.forgotPassword();
+            break;
+
+        case 4:
             cout << "\nThank you for using E-Learning Platform.\n";
             return 0;
 
