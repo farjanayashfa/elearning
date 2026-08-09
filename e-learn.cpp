@@ -3,11 +3,10 @@
 #include <string>
 #include <cctype>
 #include <limits>
-#include<conio.h>
-#include <windows.h>
+#include <conio.h>
 #include <sstream>
-#include <ctime>
-#include <cstdlib>
+#include <windows.h>
+#include <commdlg.h>
 
 using namespace std;
 
@@ -20,14 +19,30 @@ private:
     string currentUserName;
     string currentUserDept;
     string currentUserPhone;
-    int generatedOTP;
     string securityQuestion;
     string securityAnswer;
+    string courseID;
+string courseName;
+string semester;
+string credit;
 
 public:
+    string browsePDF();
     void studentDashboard();
     void teacherDashboard();
     void viewProfile();
+    void manageCourses();
+    void createCourse();
+    void uploadLecture();
+    void uploadAssignment();
+    void viewAssignments();
+    void gradeStudents();
+    void quizManagement();
+    void attendance();
+    void announcements();
+    void studentList();
+    void courseProgress();
+    void messages();
     void changePassword();
     void forgotPassword();
     bool isValidName(string name)
@@ -247,8 +262,44 @@ public:
         }
         while (!isStrongPassword(password));
 
-        cout << "\nSecurity Question: ";
-        getline(cin, securityQuestion);
+        int questionChoice;
+
+        cout << "\nChoose Security Question\n";
+        cout << "1. What is your mother's name?\n";
+        cout << "2. What is your favourite color?\n";
+        cout << "3. What is your birth place?\n";
+        cout << "4. What is your favourite teacher?\n";
+
+        do
+        {
+            cout << "Choice: ";
+            cin >> questionChoice;
+            cin.ignore();
+
+            switch(questionChoice)
+            {
+            case 1:
+                securityQuestion = "What is your mother's name?";
+                break;
+
+            case 2:
+                securityQuestion = "What is your favourite color?";
+                break;
+
+            case 3:
+                securityQuestion = "What is your birth place?";
+                break;
+
+            case 4:
+                securityQuestion = "What is your favourite teacher?";
+                break;
+
+            default:
+                cout << "Invalid Choice!\n";
+            }
+
+        }
+        while(questionChoice < 1 || questionChoice > 4);
 
         cout << "Answer: ";
         getline(cin, securityAnswer);
@@ -392,6 +443,7 @@ void ELearningSystem::studentDashboard()
         cout<<"1. View Profile\n";
         cout<<"2. Change Password\n";
         cout<<"3. Logout\n";
+        cout<<"0. Back to Main Menu\n";
 
         cout<<"\nChoice : ";
         cin>>choice;
@@ -408,25 +460,32 @@ void ELearningSystem::studentDashboard()
             break;
 
         case 3:
+        {
             char ans;
 
-            cout<<"\nAre you sure you want to logout? (Y/N): ";
-            cin>>ans;
+            cout << "\nAre you sure you want to logout? (Y/N): ";
+            cin >> ans;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
             if(ans=='Y' || ans=='y')
             {
-                cout<<"\nLogging out...\n";
+                cout << "\nLogging out...\n";
                 return;
             }
+
             break;
+        }
+
+        case 0:
+            return;
 
         default:
 
-            cout<<"\nInvalid Choice!\n";
+            cout << "\nInvalid Choice!\n";
             system("pause");
         }
     }
+
 }
 void ELearningSystem::viewProfile()
 {
@@ -439,21 +498,43 @@ void ELearningSystem::viewProfile()
     cout << "=============================\n";
 
     system("pause");
+
 }
 void ELearningSystem::changePassword()
 {
     string oldPass, newPass;
 
-    cout << "\n===== CHANGE PASSWORD =====\n";
+Start:
 
-    cout << "Enter Old Password: ";
+    cout << "\n===== CHANGE PASSWORD =====\n";
+    cout << "1. Continue\n";
+    cout << "2. Back\n";
+    cout << "Choice: ";
+
+    int op;
+    cin >> op;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    if(op == 2)
+    {
+        return;
+    }
+
+    if(op != 1)
+    {
+        cout << "\nInvalid Choice!\n";
+        system("pause");
+        system("cls");
+        goto Start;
+    }
+
+    cout << "\nEnter Old Password: ";
     oldPass = inputPassword();
 
     ifstream file("users.txt");
     ofstream temp("temp.txt");
 
     string line;
-
     bool found = false;
 
     while(getline(file, line))
@@ -482,46 +563,27 @@ void ELearningSystem::changePassword()
 
                 continue;
             }
+            string answer;
 
-            generatedOTP = 100000 + rand() % 900000;
+            cout << "\nSecurity Question:\n";
+            cout << question1 << endl;
 
-            ofstream otpFile("OTP_Message.txt");
+            cout << "Answer: ";
+            getline(cin, answer);
 
-            otpFile << "=====================================\n";
-            otpFile << "      E-LEARNING PLATFORM\n";
-            otpFile << "=====================================\n\n";
-            otpFile << "Change Password OTP\n\n";
-            otpFile << "Email : " << email1 << "\n";
-            otpFile << "OTP : " << generatedOTP << "\n";
-
-            otpFile.close();
-
-            cout << "\nSending OTP";
-
-            for(int i=0; i<3; i++)
+            if(answer != answer1)
             {
-                cout<<".";
-                Sleep(500);
-            }
-
-            cout<<"\n\nOTP Sent Successfully!\n";
-            cout<<"Please check OTP_Message.txt\n";
-
-            int otp;
-
-            cout<<"\nEnter OTP : ";
-            cin>>otp;
-            cin.ignore();
-
-            if(otp!=generatedOTP)
-            {
-                cout<<"\nWrong OTP!\n";
+                cout << "\nWrong Security Answer!\n";
 
                 temp<<role1<<","<<email1<<","<<password1<<","<<name1<<","
                     <<phone1<<","<<dept1<<","<<question1<<","<<answer1<<"\n";
 
                 continue;
             }
+
+
+
+
 
             string newPass;
             string confirmPass;
@@ -571,6 +633,7 @@ void ELearningSystem::changePassword()
         cout<<"\nPassword Change Failed.\n";
 
     system("pause");
+
 }
 
 void ELearningSystem::forgotPassword()
@@ -578,8 +641,13 @@ void ELearningSystem::forgotPassword()
     string email;
 
     cout << "\n========== FORGOT PASSWORD ==========\n";
-    cout << "Enter Email: ";
+    cout << "Enter Email (0 = Back): ";
     getline(cin, email);
+
+    if(email=="0")
+    {
+        return;
+    }
 
     ifstream file("users.txt");
 
@@ -613,36 +681,15 @@ void ELearningSystem::forgotPassword()
         if (email1 == email)
         {
             found = true;
+            cout << "\nSecurity Question:\n";
+            cout << question1 << endl;
 
-            generatedOTP = 100000 + rand() % 900000;
+            string answer;
 
-            ofstream otpFile("OTP_Message.txt");
+            cout << "Answer: ";
+            getline(cin, answer);
 
-            otpFile << "=====================================\n";
-            otpFile << "      E-LEARNING PLATFORM\n";
-            otpFile << "=====================================\n\n";
-            otpFile << "Password Reset OTP\n\n";
-            otpFile << "Email : " << email1 << "\n";
-            otpFile << "OTP : " << generatedOTP << "\n";
-
-            otpFile.close();
-
-            cout << "\nSending OTP";
-            for(int i=0; i<3; i++)
-            {
-                cout<<".";
-                Sleep(500);
-            }
-
-            cout << "\n\nOTP Sent Successfully!\n";
-            cout << "Please check OTP_Message.txt\n";
-
-            int otp;
-            cout << "\nEnter OTP: ";
-            cin >> otp;
-            cin.ignore();
-
-            if (otp == generatedOTP)
+            if(answer == answer1)
             {
                 string newPass;
 
@@ -651,19 +698,30 @@ void ELearningSystem::forgotPassword()
                     cout << "Enter New Password: ";
                     newPass = inputPassword();
 
-                    if (!isStrongPassword(newPass))
+                    if(!isStrongPassword(newPass))
                         cout << "Weak Password! Try Again.\n";
 
                 }
-                while (!isStrongPassword(newPass));
+                while(!isStrongPassword(newPass));
 
-                password1 = newPass;
+                string confirmPass;
 
-                cout << "\nPassword Reset Successful!\n";
+                cout << "Confirm Password: ";
+                confirmPass = inputPassword();
+
+                if(newPass != confirmPass)
+                {
+                    cout << "\nPassword Doesn't Match!\n";
+                }
+                else
+                {
+                    password1 = newPass;
+                    cout << "\nPassword Reset Successful!\n";
+                }
             }
             else
             {
-                cout << "\nWrong OTP!\n";
+                cout << "\nWrong Security Answer!\n";
             }
         }
 
@@ -684,11 +742,12 @@ void ELearningSystem::forgotPassword()
     }
 
     system("pause");
-}
 
+}
 
 void ELearningSystem::teacherDashboard()
 {
+
     int choice;
 
     while(true)
@@ -696,15 +755,28 @@ void ELearningSystem::teacherDashboard()
         system("cls");
 
         cout<<"=====================================\n";
-        cout<<"       TEACHER DASHBOARD\n";
+        cout<<"        TEACHER DASHBOARD\n";
         cout<<"=====================================\n";
 
-        cout<<"1. View Profile\n";
-        cout<<"2. Change Password\n";
-        cout<<"3. Logout\n";
+        cout<<"1. My Profile\n";
+        cout<<"2. Manage Courses\n";
+        cout<<"3. Create Course\n";
+        cout<<"4. Upload Lecture\n";
+        cout<<"5. Upload Assignment\n";
+        cout<<"6. View Assignments\n";
+        cout<<"7. Grade Students\n";
+        cout<<"8. Quiz Management\n";
+        cout<<"9. Attendance\n";
+        cout<<"10. Announcements\n";
+        cout<<"11. Student List\n";
+        cout<<"12. Course Progress\n";
+        cout<<"13. Messages\n";
+        cout<<"14. Change Password\n";
+        cout<<"15. Logout\n";
+
         cout<<"\nChoice : ";
         cin>>choice;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.ignore();
 
         switch(choice)
         {
@@ -713,42 +785,496 @@ void ELearningSystem::teacherDashboard()
             break;
 
         case 2:
-            changePassword();
+            manageCourses();
             break;
 
         case 3:
-        {
-            char ans;
+            createCourse();
+            break;
 
-            cout<<"\nAre you sure you want to logout? (Y/N): ";
-            cin>>ans;
+        case 4:
+            uploadLecture();
+            break;
+
+        case 5:
+            uploadAssignment();
+            break;
+
+        case 6:
+            viewAssignments();
+            break;
+
+        case 7:
+            gradeStudents();
+            break;
+
+        case 8:
+            quizManagement();
+            break;
+
+        case 9:
+            attendance();
+            break;
+
+        case 10:
+            announcements();
+            break;
+
+        case 11:
+            studentList();
+            break;
+
+        case 12:
+            courseProgress();
+            break;
+
+        case 13:
+            messages();
+            break;
+
+        case 14:
+            changePassword();
+            break;
+
+        case 15:
+            cout<<"\nLogging out...\n";
+            return;
+
+        default:
+            cout<<"\nInvalid Choice!\n";
+            system("pause");
+        }
+    }
+}
+void ELearningSystem::manageCourses()
+{
+    int choice;
+
+    while(true)
+    {
+        system("cls");
+
+        cout<<"=====================================\n";
+        cout<<"        MANAGE COURSES\n";
+        cout<<"=====================================\n";
+
+        cout<<"1. View My Courses\n";
+        cout<<"2. Search Course\n";
+        cout<<"3. Edit Course\n";
+        cout<<"4. Delete Course\n";
+        cout<<"5. Back\n";
+
+        cout<<"\nChoice : ";
+        cin>>choice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        switch(choice)
+        {
+        case 1:
+{
+    system("cls");
+
+    ifstream file("courses.txt");
+
+    string line;
+
+    cout<<"=====================================\n";
+    cout<<"         MY COURSES\n";
+    cout<<"=====================================\n\n";
+
+    bool found = false;
+
+    while(getline(file,line))
+    {
+        stringstream ss(line);
+
+        string id,name,department,sem,cr,email;
+
+        getline(ss,id,',');
+        getline(ss,name,',');
+        getline(ss,department,',');
+        getline(ss,sem,',');
+        getline(ss,cr,',');
+        getline(ss,email,',');
+
+        if(email==currentUserEmail)
+        {
+            found=true;
+
+            cout<<"Course ID   : "<<id<<endl;
+            cout<<"Course Name : "<<name<<endl;
+            cout<<"Department  : "<<department<<endl;
+            cout<<"Semester    : "<<sem<<endl;
+            cout<<"Credit      : "<<cr<<endl;
+
+            cout<<"\n-----------------------------\n";
+        }
+    }
+
+    if(!found)
+    {
+        cout<<"No Course Found.\n";
+    }
+
+    file.close();
+
+    system("pause");
+    break;
+}
+
+       case 2:
+{
+    system("cls");
+
+    string searchID;
+
+    cout<<"=====================================\n";
+    cout<<"         SEARCH COURSE\n";
+    cout<<"=====================================\n\n";
+
+    cout<<"Enter Course ID : ";
+    getline(cin, searchID);
+
+    ifstream file("courses.txt");
+
+    string line;
+    bool found=false;
+
+    while(getline(file,line))
+    {
+        stringstream ss(line);
+
+        string id,name,department,sem,cr,email;
+
+        getline(ss,id,',');
+        getline(ss,name,',');
+        getline(ss,department,',');
+        getline(ss,sem,',');
+        getline(ss,cr,',');
+        getline(ss,email,',');
+
+
+        if(id==searchID && email==currentUserEmail)
+        {
+            found=true;
+
+            cout<<"\n========== COURSE FOUND ==========\n";
+
+            cout<<"Course ID   : "<<id<<endl;
+            cout<<"Course Name : "<<name<<endl;
+            cout<<"Department  : "<<department<<endl;
+            cout<<"Semester    : "<<sem<<endl;
+            cout<<"Credit      : "<<cr<<endl;
+
+            cout<<"==================================\n";
+        }
+    }
+
+    file.close();
+
+    if(!found)
+    {
+        cout<<"\nCourse Not Found!\n";
+    }
+
+    system("pause");
+    break;
+}
+       case 3:
+{
+    system("cls");
+
+    string searchID;
+
+    cout<<"=====================================\n";
+    cout<<"          EDIT COURSE\n";
+    cout<<"=====================================\n\n";
+
+    cout<<"Enter Course ID : ";
+    getline(cin, searchID);
+
+    ifstream file("courses.txt");
+    ofstream temp("temp.txt");
+
+    string line;
+    bool found=false;
+
+    while(getline(file,line))
+    {
+        stringstream ss(line);
+
+        string id,name,department,sem,cr,email;
+
+        getline(ss,id,',');
+        getline(ss,name,',');
+        getline(ss,department,',');
+        getline(ss,sem,',');
+        getline(ss,cr,',');
+        getline(ss,email,',');
+
+        if(id==searchID && email==currentUserEmail)
+        {
+            found=true;
+
+            cout<<"\nCurrent Information\n";
+            cout<<"Course Name : "<<name<<endl;
+            cout<<"Department  : "<<department<<endl;
+            cout<<"Semester    : "<<sem<<endl;
+            cout<<"Credit      : "<<cr<<endl;
+
+            cout<<"\nEnter New Course Name : ";
+            getline(cin,name);
+
+            cout<<"Enter New Department : ";
+            getline(cin,department);
+
+            cout<<"Enter New Semester : ";
+            getline(cin,sem);
+
+            cout<<"Enter New Credit : ";
+            getline(cin,cr);
+        }
+
+        temp<<id<<","
+            <<name<<","
+            <<department<<","
+            <<sem<<","
+            <<cr<<","
+            <<email<<"\n";
+    }
+
+    file.close();
+    temp.close();
+
+    remove("courses.txt");
+    rename("temp.txt","courses.txt");
+
+    if(found)
+        cout<<"\nCourse Updated Successfully.\n";
+    else
+        cout<<"\nCourse Not Found.\n";
+
+    system("pause");
+    break;
+}
+
+        case 4:
+{
+    system("cls");
+
+    string searchID;
+    char confirm;
+
+    cout<<"=====================================\n";
+    cout<<"         DELETE COURSE\n";
+    cout<<"=====================================\n\n";
+
+    cout<<"Enter Course ID : ";
+    getline(cin, searchID);
+
+    ifstream file("courses.txt");
+    ofstream temp("temp.txt");
+
+    string line;
+    bool found=false;
+
+    while(getline(file,line))
+    {
+        stringstream ss(line);
+
+        string id,name,department,sem,cr,email;
+
+        getline(ss,id,',');
+        getline(ss,name,',');
+        getline(ss,department,',');
+        getline(ss,sem,',');
+        getline(ss,cr,',');
+        getline(ss,email,',');
+
+        if(id==searchID && email==currentUserEmail)
+        {
+            found=true;
+
+            cout<<"\nCourse Found!\n";
+            cout<<"Course Name : "<<name<<endl;
+
+            cout<<"\nAre you sure you want to delete this course? (Y/N): ";
+            cin>>confirm;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-            if(ans=='Y' || ans=='y')
+            if(confirm=='Y' || confirm=='y')
             {
-                cout<<"\nLogging out...\n";
-                return;
+                cout<<"\nCourse Deleted Successfully!\n";
+                continue;
             }
-
-            break;
         }
-        default:
 
+        temp<<id<<","
+            <<name<<","
+            <<department<<","
+            <<sem<<","
+            <<cr<<","
+            <<email<<"\n";
+    }
+
+    file.close();
+    temp.close();
+
+    remove("courses.txt");
+    rename("temp.txt","courses.txt");
+
+    if(!found)
+    {
+        cout<<"\nCourse Not Found!\n";
+    }
+
+    system("pause");
+    break;
+}
+
+        case 5:
+            return;
+
+        default:
             cout<<"\nInvalid Choice!\n";
             system("pause");
         }
     }
 }
 
+void ELearningSystem::createCourse()
+{
+    system("cls");
+
+    cout << "=====================================\n";
+    cout << "          CREATE COURSE\n";
+    cout << "=====================================\n";
+
+    cout << "Course ID      : ";
+    getline(cin, courseID);
+
+    cout << "Course Name    : ";
+    getline(cin, courseName);
+
+    cout << "Department     : ";
+    getline(cin, dept);
+
+    cout << "Semester       : ";
+    getline(cin, semester);
+
+    cout << "Credit         : ";
+    getline(cin, credit);
+
+    ofstream file("courses.txt", ios::app);
+
+    file << courseID << ","
+         << courseName << ","
+         << dept << ","
+         << semester << ","
+         << credit << ","
+         << currentUserEmail << "\n";
+
+    file.close();
+
+    cout << "\n=====================================\n";
+    cout << "Course Created Successfully.\n";
+    cout << "=====================================\n";
+
+    system("pause");
+}
+
+void ELearningSystem::uploadLecture()
+{
+    cout<<"\nUpload Lecture Feature Coming Soon...\n";
+    system("pause");
+}
+
+void ELearningSystem::uploadAssignment()
+{
+    cout<<"\nUpload Assignment Feature Coming Soon...\n";
+    system("pause");
+}
+
+void ELearningSystem::viewAssignments()
+{
+    cout<<"\nView Assignments Feature Coming Soon...\n";
+    system("pause");
+}
+
+void ELearningSystem::gradeStudents()
+{
+    cout<<"\nGrade Students Feature Coming Soon...\n";
+    system("pause");
+}
+
+void ELearningSystem::quizManagement()
+{
+    cout<<"\nQuiz Management Feature Coming Soon...\n";
+    system("pause");
+}
+
+void ELearningSystem::attendance()
+{
+    cout<<"\nAttendance Feature Coming Soon...\n";
+    system("pause");
+}
+
+void ELearningSystem::announcements()
+{
+    cout<<"\nAnnouncements Feature Coming Soon...\n";
+    system("pause");
+}
+
+void ELearningSystem::studentList()
+{
+    cout<<"\nStudent List Feature Coming Soon...\n";
+    system("pause");
+}
+
+void ELearningSystem::courseProgress()
+{
+    cout<<"\nCourse Progress Feature Coming Soon...\n";
+    system("pause");
+}
+
+void ELearningSystem::messages()
+{
+    cout<<"\nMessages Feature Coming Soon...\n";
+    system("pause");
+}
+string ELearningSystem::browsePDF()
+{
+    char filename[MAX_PATH] = "";
+
+    OPENFILENAME ofn;
+
+    ZeroMemory(&ofn, sizeof(ofn));
+
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = NULL;
+    ofn.lpstrFile = filename;
+    ofn.nMaxFile = MAX_PATH;
+
+    // PDF
+    ofn.lpstrFilter = "PDF Files\0*.pdf\0All Files\0*.*\0";
+
+    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+
+    if(GetOpenFileName(&ofn))
+    {
+        return string(filename);
+    }
+
+    return "";
+}
 int main()
 {
-    srand(time(0));
 
     ELearningSystem obj;
     int choice;
 
     while (true)
-    {
+    {   system("cls");
         cout << "        E-LEARNING PLATFORM\n";
 
 
@@ -785,5 +1311,5 @@ int main()
     }
 
     return 0;
-}
 
+}
